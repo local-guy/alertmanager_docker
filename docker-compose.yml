@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+
+  telegram-webhook:
+    build:
+      context: ./telegram-webhook
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+
+
+#    environment:
+ #     - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+  #    - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+

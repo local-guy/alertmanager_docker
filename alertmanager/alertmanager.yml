@@ -1,0 +1,12 @@
+global:
+  resolve_timeout: 1m
+
+route:
+  receiver: 'telegram-alerts'
+  repeat_interval: 1h
+
+receivers:
+  - name: 'telegram-alerts'
+    webhook_configs:
+      - url: 'http://telegram-webhook:8080/alert'
+        send_resolved: true
