@@ -6,8 +6,8 @@ import os
 app = Flask(__name__)
 
 
-BOT_TOKEN = "8111934398:AAESnyNCCyCpLZufHViUFAqLXDqqan5JHyY"
-CHAT_ID = "-4955420023"
+BOT_TOKEN = "enter_your_token"
+CHAT_ID = "enter_your_chat"
 
 print(f"[DEBUG] BOT_TOKEN: {BOT_TOKEN}")
 print(f"[DEBUG] CHAT_ID: {CHAT_ID}")
