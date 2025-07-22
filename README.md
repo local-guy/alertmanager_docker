@@ -28,7 +28,14 @@ Add to your prometheus.yml:
 alerting:
   alertmanagers:
   - static_configs:
-    - targets: ['localhost:9093'] 
+    - targets: ['localhost:9093']
+   
+**ALSO for alert rules notification**
+cp rule.yml /etc/prometheus/
+
+**AND Add to your prometheus.yml:**
+rule_files:
+  - "/etc/prometheus/rule.yml"  # Путь к файлу с алертами
       
 Auto-start (Linux)
 ============================================================
