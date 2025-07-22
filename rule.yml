@@ -1,0 +1,141 @@
+groups:
+  - name: node_alerts
+    rules:
+      #тестовый
+      - alert: TestAlwaysFiring
+        expr: vector(1)
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "This is a test alert"
+          description: "This alert is always firing for testing purposes"
+      # Высокая загрузка CPU
+      - alert: HighCPU
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is above 90% (current value is: {{ $value }}%)"
+
+      # Низкая свободная память
+      - alert: LowMemory
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low memory on {{ $labels.instance }}"
+          description: "Available RAM is {{ $value }}%"
+
+      # Высокая нагрузка (load average)
+      - alert: HighLoad
+        expr: node_load1 / count(node_cpu_seconds_total{mode="idle"}) by (instance) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High load average on {{ $labels.instance }}"
+          description: "Load average (1m) is {{ $value }} (high load for instance)"
+
+      # Мало места на диске
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{device!~"tmpfs|ramfs"} / node_filesystem_size_bytes{device!~"tmpfs|ramfs"}) * 100 < 15
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }} ({{ $labels.mountpoint }})"
+          description: "Free space is {{ $value }}%"
+
+      # Высокая задержка диска
+      - alert: HighDiskIO
+        expr: rate(node_disk_io_time_seconds_total[1m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk IO latency on {{ $labels.instance }}"
+          description: "Latency is {{ $value }}s"
+
+      # Высокий трафик
+      - alert: HighNetworkTraffic
+        expr: (rate(node_network_receive_bytes_total[1m]) + rate(node_network_transmit_bytes_total[1m])) / 125000 > 0.9  # 1 Gbps = 125000 KB/s
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High network traffic on {{ $labels.instance }} ({{ $labels.device }})"
+          description: "Traffic is {{ $value }}% of 1 Gbps"
+
+      # Высокое steal time (только для виртуалок)
+      - alert: HighStealTime
+        expr: rate(node_cpu_seconds_total{mode="steal"}[5m]) * 100 > 20
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU steal time on {{ $labels.instance }} (VM)"
+          description: "Steal time is {{ $value }}%"
+
+      # Использование swap
+      - alert: HighSwapUsage
+        expr: (node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes) / node_memory_SwapTotal_bytes * 100 > 50
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High swap usage on {{ $labels.instance }}"
+          description: "Swap usage is {{ $value }}%"
+
+      # Высокая температура процессора
+      - alert: HighCPUTemperature
+        expr: node_hwmon_temp_celsius{chip=~"platform_coretemp.*"} > 80
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU temperature on {{ $labels.instance }}"
+          description: "CPU temperature is {{ $value }}°C"
+
+      # Состояние диска (SMART)
+      - alert: DiskReallocatedSectors
+        expr: node_disk_smart_reallocated_sectors > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk reallocated sectors detected on {{ $labels.instance }}"
+          description: "Device {{ $labels.device }} has {{ $value }} reallocated sectors"
+
+      # Температура диска
+      - alert: HighDiskTemperature
+        expr: node_disk_smart_temperature_celsius > 60
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk temperature on {{ $labels.instance }}"
+          description: "Disk {{ $labels.device }} temperature is {{ $value }}°C"
+
+      # Падение доступности сервера
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "Prometheus не может достучаться до {{ $labels.instance }} более 2 минут"
+
+      # Ошибки диска (Pending Sector)
+      - alert: DiskPendingSector
+        expr: node_disk_smart_current_pending_sector > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk has pending sectors on {{ $labels.instance }}"
+          description: "Device {{ $labels.device }} has {{ $value }} pending sectors"
